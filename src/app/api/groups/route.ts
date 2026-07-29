@@ -1,13 +1,13 @@
 import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth/server";
+import { getSession } from "@/lib/auth/server";
 import { ensureSchema, sql } from "@/lib/db";
 
 // Minimal groups CRUD to prove the auth + schema wiring end to end
 // (TIN-463 acceptance criteria). Real group-formation UX/invite flow is TIN-467.
 
 export async function GET() {
-  const { data: session } = await auth.getSession();
+  const { data: session } = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
@@ -24,7 +24,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { data: session } = await auth.getSession();
+  const { data: session } = await getSession();
   if (!session?.user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }

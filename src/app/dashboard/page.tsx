@@ -1,11 +1,8 @@
-import { auth } from "@/lib/auth/server";
+import { getSession } from "@/lib/auth/server";
 import { SignOutButton } from "./sign-out-button";
 
-// Server components using `auth` methods must be rendered dynamically.
-export const dynamic = "force-dynamic";
-
 export default async function DashboardPage() {
-  const { data: session } = await auth.getSession();
+  const { data: session } = await getSession();
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">

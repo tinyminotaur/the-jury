@@ -1,17 +1,10 @@
-import { createNeonAuth } from "@neondatabase/auth/next/server";
+import { cookies } from "next/headers";
+import { SESSION_COOKIE, verifySessionCookieValue } from "./session";
 
-if (!process.env.NEON_AUTH_BASE_URL) {
-  throw new Error("NEON_AUTH_BASE_URL is not set");
+export async function getSession() {
+  const store = await cookies();
+  const value = store.get(SESSION_COOKIE)?.value;
+  const payload = verifySessionCookieValue(value);
+  if (!payload) return { data: null };
+  return { data: { user: { id: payload.userId, email: payload.email } } };
 }
-if (!process.env.NEON_AUTH_COOKIE_SECRET) {
-  throw new Error(
-    "NEON_AUTH_COOKIE_SECRET is not set (generate with: openssl rand -base64 32)"
-  );
-}
-
-export const auth = createNeonAuth({
-  baseUrl: process.env.NEON_AUTH_BASE_URL,
-  cookies: {
-    secret: process.env.NEON_AUTH_COOKIE_SECRET,
-  },
-});

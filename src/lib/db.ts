@@ -9,9 +9,9 @@ export const sql = neon(process.env.DATABASE_URL);
 let schemaEnsured = false;
 
 /**
- * App-specific tables only. User identity/session lives in Neon Auth
- * (see lib/auth/server.ts) — user_id here is whatever id Neon Auth's
- * session.user.id returns, stored as text rather than assumed uuid.
+ * App-specific tables. Auth is fully custom (see lib/auth/session.ts,
+ * lib/auth/server.ts) after dropping Neon Managed Better Auth -- users
+ * and magic_links live here too, not in a separate auth service.
  *
  * Active/Deferred/Recused (PRD 2.4) are deliberately NOT stored columns —
  * they're derived from vote/message timestamps (recused = no phase-1 vote,
@@ -20,6 +20,22 @@ let schemaEnsured = false;
  */
 export async function ensureSchema(): Promise<void> {
   if (schemaEnsured) return;
+
+  await sql`CREATE TABLE IF NOT EXISTS users (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    email text UNIQUE NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+  );`;
+
+  // One-time-use tokens for the magic-link flow. A row is consumed
+  // (used_at set) on first successful verify; expired/used tokens fail.
+  await sql`CREATE TABLE IF NOT EXISTS magic_links (
+    token text PRIMARY KEY,
+    email text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    used_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT now()
+  );`;
 
   await sql`CREATE TABLE IF NOT EXISTS groups (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { authClient } from "@/lib/auth/client";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -15,14 +14,16 @@ export default function SignInPage() {
     setStatus("sending");
     setError(null);
 
-    const { error: sendError } = await authClient.signIn.magicLink({
-      email,
-      callbackURL: "/dashboard",
+    const res = await fetch("/api/auth/request", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
     });
 
-    if (sendError) {
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
       setStatus("error");
-      setError(sendError.message ?? "Something went wrong. Try again.");
+      setError(body.error ?? "Something went wrong. Try again.");
       return;
     }
     setStatus("sent");

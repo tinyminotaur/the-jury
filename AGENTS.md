@@ -10,9 +10,9 @@ Daily cooperative jury-deliberation game. Full spec: `file:///Users/coal/neon-li
 
 **Deploy:** GitHub-first — push to `main`, Vercel auto-deploys via its GitHub integration (project imported at `jury.tinyminotaur.co`). No Vercel CLI/token used anywhere in this workflow.
 
-**DB:** `@neondatabase/serverless` against Vercel Postgres (backed by Neon). **Not** `@vercel/postgres` — that package is deprecated as of this project's creation (2026-07-29); Vercel's own migration guide points new projects at Neon's SDK directly. `POSTGRES_URL` (or Neon's own env var name — confirm exact name once TIN-461 provisions the DB) is injected by Vercel.
+**DB:** `@neondatabase/serverless` against Vercel Postgres (backed by Neon), using `DATABASE_URL`. **Not** `@vercel/postgres` — that package is deprecated as of this project's creation (2026-07-29); Vercel's own migration guide points new projects at Neon's SDK directly.
 
-**Auth:** passwordless email magic link via Resend. No passwords stored.
+**Auth:** fully custom passwordless email magic link. **Not** Neon Managed Better Auth or `@daveyplate/better-auth-ui` — tried both, hit a UI-kit context-propagation bug and then a cross-domain session-cookie limitation Neon's own docs admit isn't fully supported yet for a Vercel-app + neon.tech-auth-backend deployment. See `lib/auth/session.ts` (signed cookie, HMAC via `NEON_AUTH_COOKIE_SECRET` repurposed as a generic session secret), `lib/db.ts` (`users`/`magic_links` tables), `app/api/auth/{request,verify,sign-out}/route.ts`. Resend sends the email directly. Full story in DECISIONS.md — read it before reaching for any Better Auth / Neon Auth package again for this project.
 
 **Deliberation updates:** polling (15-30s), not WebSockets — deliberate choice, see DECISIONS.md.
 
