@@ -1,5 +1,5 @@
-import { UserButton } from "@daveyplate/better-auth-ui";
 import { auth } from "@/lib/auth/server";
+import { SignOutButton } from "./sign-out-button";
 
 // Server components using `auth` methods must be rendered dynamically.
 export const dynamic = "force-dynamic";
@@ -10,7 +10,7 @@ export default async function DashboardPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6 text-center">
       <div className="flex items-center gap-3">
-        <UserButton />
+        <SignOutButton />
         <p className="text-lg">
           Signed in as {session?.user?.email ?? "unknown"}
         </p>
