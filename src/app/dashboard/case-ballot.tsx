@@ -87,7 +87,13 @@ export function VotedSummary({
   );
 }
 
-export function CaseBallot({ theCase }: { theCase: Case }) {
+export function CaseBallot({
+  theCase,
+  groupId,
+}: {
+  theCase: Case;
+  groupId?: string;
+}) {
   const [choice, setChoice] = useState<string | null>(null);
   const [reasoningNote, setReasoningNote] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "error">(
@@ -116,6 +122,7 @@ export function CaseBallot({ theCase }: { theCase: Case }) {
         caseId: theCase.id,
         choice,
         reasoningNote,
+        groupId,
       }),
     });
 

@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/server";
 import { ensureSchema, sql } from "@/lib/db";
 
-// Phase 1 (solo) ballot only for now -- group_id is always null here.
-// Per-group Phase 1 voting (a user in a group votes once per group they're
-// in, per PRD 4.3) lands with group formation, TIN-467.
+// Phase 1 ballot -- solo (groupId omitted, group_id NULL) or scoped to a
+// specific group the caller is a member of (per-group votes, PRD 4.3: a
+// user in multiple groups votes separately in each).
 export async function POST(request: Request) {
   const { data: session } = await getSession();
   if (!session?.user) {
@@ -14,6 +14,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const caseId = typeof body.caseId === "string" ? body.caseId : "";
   const choice = typeof body.choice === "string" ? body.choice : "";
+  const groupId = typeof body.groupId === "string" ? body.groupId : null;
   const reasoningNote =
     typeof body.reasoningNote === "string" && body.reasoningNote.trim()
       ? body.reasoningNote.trim()
@@ -28,11 +29,30 @@ export async function POST(request: Request) {
 
   await ensureSchema();
 
-  const [existing] = await sql`
-    SELECT id FROM votes
-    WHERE case_id = ${caseId} AND user_id = ${session.user.id}
-      AND group_id IS NULL AND phase = 1
-  `;
+  if (groupId) {
+    const [membership] = await sql`
+      SELECT 1 FROM group_members
+      WHERE group_id = ${groupId} AND user_id = ${session.user.id}
+    `;
+    if (!membership) {
+      return NextResponse.json(
+        { error: "You're not a member of that group" },
+        { status: 403 }
+      );
+    }
+  }
+
+  const [existing] = groupId
+    ? await sql`
+        SELECT id FROM votes
+        WHERE case_id = ${caseId} AND user_id = ${session.user.id}
+          AND group_id = ${groupId} AND phase = 1
+      `
+    : await sql`
+        SELECT id FROM votes
+        WHERE case_id = ${caseId} AND user_id = ${session.user.id}
+          AND group_id IS NULL AND phase = 1
+      `;
   if (existing) {
     return NextResponse.json(
       { error: "You've already voted on this case" },
@@ -42,7 +62,7 @@ export async function POST(request: Request) {
 
   const [vote] = await sql`
     INSERT INTO votes (case_id, group_id, user_id, phase, choice, reasoning_note)
-    VALUES (${caseId}, NULL, ${session.user.id}, 1, ${choice}, ${reasoningNote})
+    VALUES (${caseId}, ${groupId}, ${session.user.id}, 1, ${choice}, ${reasoningNote})
     RETURNING id, choice, created_at
   `;
 

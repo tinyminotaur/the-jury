@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getSession } from "@/lib/auth/server";
 import { ensureSchema, sql } from "@/lib/db";
 import { getTodaysCase, seedCases } from "@/lib/cases";
@@ -26,7 +27,12 @@ export default async function DashboardPage() {
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6">
       <div className="flex items-center justify-between">
         <p className="text-sm text-zinc-400">Signed in as {user.email}</p>
-        <SignOutButton />
+        <div className="flex items-center gap-4">
+          <Link href="/groups" className="text-sm underline">
+            My groups
+          </Link>
+          <SignOutButton />
+        </div>
       </div>
 
       {!theCase ? (

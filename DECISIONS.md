@@ -53,6 +53,11 @@
 **Side effects:** `seedCases()` and this hand-written case are meant to be temporary/removable once TIN-469 builds real case-authoring tooling -- don't extend this function with more hardcoded cases, that's the wrong place for bulk content.
 **Vote options:** added `cases.vote_options` (jsonb, defaults `["Guilty", "Not Guilty"]`) per PRD 2.1's note that non-legal dilemmas may need different option pairs (Yes/No, Option A/Option B) -- keeps the ballot UI generic rather than hardcoding "Guilty/Not Guilty" everywhere.
 
+## 2026-07-29 — Group formation: known gap in the invite-link cold-start UX
+**Context:** TIN-467 built create/join groups and a per-group case+ballot page (`/groups/[groupId]`), scoping votes by `group_id` (per PRD 4.3: a user in multiple groups votes separately in each). Join is by invite code (`POST /api/groups/join`), capped at 8 members (PRD 4.3).
+**Known gap, not fixed:** if a signed-out user opens a raw invite link (e.g. `/groups/join?code=...` if one existed) or the `/groups/[groupId]` page directly, `proxy.ts` redirects them to `/auth/sign-in` and, after verifying the magic link, they land on the hardcoded `/dashboard` -- not back at the invite they started from. There's no join-by-URL page yet (only the paste-a-code form on `/groups`), and no redirect-preserving `next` param through the sign-in/verify flow. Fine for now since testing so far has both accounts already signed in, but a real "click this link to join" flow needs both pieces before launch.
+**Side effects if picked up later:** add a `/groups/join/[code]` page, and thread a `next` query param through `/auth/sign-in` -> `POST /api/auth/request` (embed in the magic-link email's callback) -> `GET /api/auth/verify` -> final redirect.
+
 ## 2026-07-29 — No stored `reveals`/`community_stats` table
 **Context:** TIN-463 as originally scoped listed "reveals/community_stats aggregates" as a table alongside votes/messages.
 **Considered:** a materialized reveals table updated on write; computing reveal data (swing rate, vote splits, cross-group stats) from `votes`/`deliberation_messages` on read.
