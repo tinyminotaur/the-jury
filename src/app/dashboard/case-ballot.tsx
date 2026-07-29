@@ -3,58 +3,8 @@
 import { useState } from "react";
 import type { Case } from "@/lib/cases";
 
-export function CaseBallot({ theCase }: { theCase: Case }) {
+function CaseBrief({ theCase }: { theCase: Case }) {
   const [showEvidence, setShowEvidence] = useState(false);
-  const [choice, setChoice] = useState<string | null>(null);
-  const [reasoningNote, setReasoningNote] = useState("");
-  const [status, setStatus] = useState<"idle" | "submitting" | "error">(
-    "idle"
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [submittedChoice, setSubmittedChoice] = useState<string | null>(null);
-
-  const wordCount = reasoningNote.trim()
-    ? reasoningNote.trim().split(/\s+/).length
-    : 0;
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!choice) return;
-    setStatus("submitting");
-    setError(null);
-
-    const res = await fetch("/api/votes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        caseId: theCase.id,
-        choice,
-        reasoningNote,
-      }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setStatus("error");
-      setError(data.error ?? "Something went wrong. Try again.");
-      return;
-    }
-
-    setSubmittedChoice(choice);
-  }
-
-  if (submittedChoice) {
-    return (
-      <div className="rounded-xl border p-6 text-center">
-        <p className="text-lg font-medium">
-          Vote locked in: {submittedChoice}
-        </p>
-        <p className="mt-2 text-sm text-zinc-400">
-          You&apos;ll see how it compares to history at reveal.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="grid gap-6">
@@ -102,6 +52,96 @@ export function CaseBallot({ theCase }: { theCase: Case }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+export function VotedSummary({
+  theCase,
+  choice,
+  reasoningNote,
+}: {
+  theCase: Case;
+  choice: string;
+  reasoningNote: string | null;
+}) {
+  return (
+    <div className="grid gap-6">
+      <CaseBrief theCase={theCase} />
+      <div className="rounded-xl border p-6">
+        <p className="text-lg font-medium">Your vote: {choice}</p>
+        {reasoningNote ? (
+          <p className="mt-3 whitespace-pre-line text-sm text-zinc-300">
+            &ldquo;{reasoningNote}&rdquo;
+          </p>
+        ) : (
+          <p className="mt-3 text-sm text-zinc-500">
+            No reasoning note added.
+          </p>
+        )}
+        <p className="mt-4 text-sm text-zinc-400">
+          Locked in. You&apos;ll see how it compares to history at reveal.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function CaseBallot({ theCase }: { theCase: Case }) {
+  const [choice, setChoice] = useState<string | null>(null);
+  const [reasoningNote, setReasoningNote] = useState("");
+  const [status, setStatus] = useState<"idle" | "submitting" | "error">(
+    "idle"
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState<{
+    choice: string;
+    reasoningNote: string | null;
+  } | null>(null);
+
+  const wordCount = reasoningNote.trim()
+    ? reasoningNote.trim().split(/\s+/).length
+    : 0;
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!choice) return;
+    setStatus("submitting");
+    setError(null);
+
+    const res = await fetch("/api/votes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        caseId: theCase.id,
+        choice,
+        reasoningNote,
+      }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setStatus("error");
+      setError(data.error ?? "Something went wrong. Try again.");
+      return;
+    }
+
+    setSubmitted({ choice, reasoningNote: reasoningNote.trim() || null });
+  }
+
+  if (submitted) {
+    return (
+      <VotedSummary
+        theCase={theCase}
+        choice={submitted.choice}
+        reasoningNote={submitted.reasoningNote}
+      />
+    );
+  }
+
+  return (
+    <div className="grid gap-6">
+      <CaseBrief theCase={theCase} />
 
       <form onSubmit={handleSubmit} className="grid gap-4 border-t pt-6">
         <div className="flex gap-3">
