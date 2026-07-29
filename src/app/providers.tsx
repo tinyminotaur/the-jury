@@ -15,6 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       onSessionChange={() => router.refresh()}
       redirectTo="/dashboard"
       credentials={false}
+      magicLink
     >
       {children}
     </NeonAuthUIProvider>
