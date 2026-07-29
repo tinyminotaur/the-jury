@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -6,9 +8,15 @@ export default function Home() {
           The Jury
         </h1>
         <p className="max-w-md text-lg text-zinc-600 dark:text-zinc-400">
-          Scaffold is up. Case brief, deliberation, and reveal flows land in
-          later issues (TIN-463 onward).
+          Scaffold is up, Magic Link auth is wired in. Case brief,
+          deliberation, and reveal flows land in later issues.
         </p>
+        <Link
+          href="/dashboard"
+          className="rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+        >
+          Sign in
+        </Link>
         <p className="text-sm text-zinc-400 dark:text-zinc-600">
           Status: OK &middot; build {process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "local"}
         </p>

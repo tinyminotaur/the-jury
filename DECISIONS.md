@@ -24,6 +24,18 @@
 **Chose:** Neon Managed Better Auth with the Magic Link plugin enabled. It's already provisioned (came free with the Neon integration), needs no custom token-generation/session code from us, and uses the same Resend API key already sitting in Vercel env vars for the actual email send — the pieces Josh already set up assemble into the exact auth flow the PRD calls for, with less code to write and maintain.
 **Side effects:** TIN-463 rewritten to integrate against Neon Auth's client/API instead of building magic-link logic from scratch. Need to verify during TIN-463 implementation whether the Resend key needs to be separately configured inside the Neon Console's Auth settings (Neon Auth runs on Neon's infra, not inside our Vercel deployment, so it may not auto-read our Vercel env vars) — flagged, not yet confirmed.
 
+## 2026-07-29 — No stored `reveals`/`community_stats` table
+**Context:** TIN-463 as originally scoped listed "reveals/community_stats aggregates" as a table alongside votes/messages.
+**Considered:** a materialized reveals table updated on write; computing reveal data (swing rate, vote splits, cross-group stats) from `votes`/`deliberation_messages` on read.
+**Chose:** compute on read. Same principle as not storing Active/Deferred/Recused as a column (see schema comment in `lib/db.ts`) — a derived value that can drift from its source is worse than a query, and case/group/vote volume is far too small for this to be a real performance problem at friend-group-beta scale. Revisit only if reveal queries actually show up as slow once TIN-468 is built.
+**Side effects:** `lib/db.ts` has no `reveals` table. TIN-468 (reveal UI) computes its three layers directly from `votes`/`cases`/`deliberation_messages`.
+
+## 2026-07-29 — Next.js 16 breaking changes hit during TIN-463 (for future reference)
+**Context:** AGENTS.md warns this Next.js version has undocumented-in-training-data breaking changes. Two hit immediately when wiring Neon Auth:
+1. The `middleware.ts` file convention is deprecated in favor of `proxy.ts` (same export shape — default export function + optional `config.matcher` — just a rename). `next build` prints a warning but still builds either way; only discovered the rename was mandatory-in-spirit by reading `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md` directly.
+2. Neon Auth's route handler (`auth.handler()` from `@neondatabase/auth/next/server`) hardcodes an internal `Params` type expecting `{ path: string[] }` — the catch-all route folder **must** be named `app/api/auth/[...path]/`, not `[...all]` or any other name, or TypeScript fails the build with a type-satisfaction error on `RouteHandlerConfig`. Not documented anywhere obvious; found by reading the actual installed `.d.mts` file after a build failure.
+**Side effects:** `src/proxy.ts` (not `middleware.ts`), `src/app/api/auth/[...path]/route.ts` (not `[...all]`). If a future Next.js/Neon Auth upgrade changes either of these again, `npm run build`'s own type errors are the fastest way to find the real answer — faster and more reliable than searching docs/blog posts for this particular integration.
+
 ## 2026-07-29 — Deliberation thread updates: polling, not WebSockets
 **Context:** PRD Section 10.1 suggests "WebSocket or pub-sub" for the deliberation thread; Section 10.3 separately describes the thread as "read-heavy, write-light" and async-friendly.
 **Considered:** WebSockets (Pusher/Ably or self-hosted); Server-Sent Events; simple polling.
