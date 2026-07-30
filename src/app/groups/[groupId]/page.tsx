@@ -70,7 +70,14 @@ export default async function GroupCasePage({
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold">{group.name}</h1>
+          <h1 className="text-lg font-semibold">
+            {group.name}
+            {user.email.startsWith("demo+") && (
+              <span className="ml-2 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">
+                {user.email.replace("demo+", "").replace("@thejury.test", "")}
+              </span>
+            )}
+          </h1>
           <p className="text-sm text-zinc-400">
             {memberCount} {memberCount === 1 ? "member" : "members"} ·
             invite code <span className="font-mono">{group.invite_code}</span>

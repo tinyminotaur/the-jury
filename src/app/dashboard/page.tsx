@@ -42,7 +42,14 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-8 p-6">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-zinc-400">Signed in as {user.email}</p>
+        <p className="text-sm text-zinc-400">
+          Signed in as {user.email}
+          {user.email.startsWith("demo+") && (
+            <span className="ml-2 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">
+              DEMO
+            </span>
+          )}
+        </p>
         <SignOutButton />
       </div>
 

@@ -20,6 +20,13 @@ type Message = {
 
 const WARNING_WINDOW_MS = 15 * 60 * 1000;
 
+function displayName(email: string): string {
+  if (email.startsWith("demo+")) {
+    return email.replace("demo+", "").replace("@thejury.test", "");
+  }
+  return email.split("@")[0];
+}
+
 function formatRemaining(ms: number): string {
   if (ms <= 0) return "0:00";
   const totalSeconds = Math.floor(ms / 1000);
@@ -194,7 +201,7 @@ export function DeliberationRoom({
               {messages.map((m) => (
                 <li key={m.id}>
                   <p className="text-xs text-zinc-500">
-                    {m.user_id === currentUserId ? "You" : m.email.split("@")[0]}
+                    {m.user_id === currentUserId ? "You" : displayName(m.email)}
                   </p>
                   <p className="text-sm">{m.body}</p>
                 </li>
