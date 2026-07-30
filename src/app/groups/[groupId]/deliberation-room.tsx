@@ -77,12 +77,21 @@ export function DeliberationRoom({
     e.preventDefault();
     const body = messageBody.trim();
     if (!body) return;
-    setMessageBody("");
-    await fetch("/api/deliberation-messages", {
+    setError(null);
+
+    const res = await fetch("/api/deliberation-messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ caseId: theCase.id, groupId, body }),
     });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "Couldn't send that message. Try again.");
+      return;
+    }
+
+    setMessageBody("");
     poll();
   }
 

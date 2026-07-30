@@ -76,8 +76,8 @@ export default async function GroupCasePage({
             invite code <span className="font-mono">{group.invite_code}</span>
           </p>
         </div>
-        <Link href="/groups" className="text-sm underline">
-          All groups
+        <Link href="/dashboard" className="text-sm underline">
+          Dashboard
         </Link>
       </div>
 
