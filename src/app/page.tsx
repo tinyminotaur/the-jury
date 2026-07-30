@@ -6,23 +6,23 @@ export default function Home() {
   const demoSecret = process.env.DEMO_MODE_SECRET;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-10 bg-zinc-50 px-6 py-16 font-sans dark:bg-black">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-10 bg-black px-6 py-16 font-sans">
       <main className="flex flex-col items-center gap-4 text-center">
-        <h1 className="text-3xl font-semibold tracking-tight text-black dark:text-zinc-50">
+        <h1 className="text-3xl font-semibold tracking-tight text-zinc-50">
           The Jury
         </h1>
-        <p className="max-w-md text-lg text-zinc-600 dark:text-zinc-400">
+        <p className="max-w-md text-lg text-zinc-400">
           A daily cooperative jury-deliberation game. Read a real historical
           case, cast a private vote, deliberate, and see how you compare to
           history.
         </p>
         <Link
           href="/dashboard"
-          className="rounded-full bg-foreground px-5 py-2.5 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc]"
+          className="rounded-full bg-white px-5 py-2.5 text-sm font-medium text-black transition-colors hover:bg-zinc-300"
         >
           Sign in
         </Link>
-        <p className="text-sm text-zinc-400 dark:text-zinc-600">
+        <p className="text-sm text-zinc-600">
           Status: OK &middot; build {process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "local"}
         </p>
       </main>

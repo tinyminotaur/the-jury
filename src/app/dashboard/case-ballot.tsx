@@ -69,15 +69,6 @@ function CaseBrief({ theCase }: { theCase: Case }) {
           )}
         </div>
 
-        <a
-          href={theCase.source_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-zinc-400 underline"
-        >
-          Source: Wikipedia
-        </a>
-
         {theCase.evidence.length > 0 && (
           <div>
             <button
