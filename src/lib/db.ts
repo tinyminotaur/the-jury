@@ -99,5 +99,20 @@ export async function ensureSchema(): Promise<void> {
   await sql`CREATE INDEX IF NOT EXISTS deliberation_messages_lookup_idx
     ON deliberation_messages (case_id, group_id, created_at);`;
 
+  // One row per (case, group) once Phase 1 quorum is met (PRD 2.2). status
+  // starts 'pending'; resolves to 'unanimous' (auto-detected), 'majority'
+  // (explicit accept within the final 15 min), or 'hung' (clock expired
+  // with neither). final_choice is set only once resolved.
+  await sql`CREATE TABLE IF NOT EXISTS deliberations (
+    case_id uuid NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    group_id uuid NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+    started_at timestamptz NOT NULL DEFAULT now(),
+    clock_ends_at timestamptz NOT NULL,
+    status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'unanimous', 'majority', 'hung')),
+    final_choice text,
+    resolved_at timestamptz,
+    PRIMARY KEY (case_id, group_id)
+  );`;
+
   schemaEnsured = true;
 }

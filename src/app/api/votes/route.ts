@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/server";
 import { ensureSchema, sql } from "@/lib/db";
+import { checkQuorumAndMaybeStart, resolveIfPossible } from "@/lib/deliberation";
 
-// Phase 1 (initial ballot) or Phase 2 (solo affirm/change, or eventually
-// group deliberation, TIN-465) -- solo (groupId omitted, group_id NULL) or
-// scoped to a specific group the caller is a member of (per-group votes,
-// PRD 4.3: a user in multiple groups votes separately in each).
+// Phase 1 (initial ballot, one shot -- solo or group) or Phase 2:
+// - solo Phase 2 (TIN-466): one shot, affirm or change once.
+// - group Phase 2 (TIN-465): repeatable -- each row is a vote change
+//   during deliberation, tracked for swing rate. Only allowed while that
+//   group's deliberation is still 'pending'.
 export async function POST(request: Request) {
   const { data: session } = await getSession();
   if (!session?.user) {
@@ -44,22 +46,26 @@ export async function POST(request: Request) {
     }
   }
 
-  const [existing] = groupId
-    ? await sql`
-        SELECT id FROM votes
-        WHERE case_id = ${caseId} AND user_id = ${session.user.id}
-          AND group_id = ${groupId} AND phase = ${phase}
-      `
-    : await sql`
-        SELECT id FROM votes
-        WHERE case_id = ${caseId} AND user_id = ${session.user.id}
-          AND group_id IS NULL AND phase = ${phase}
-      `;
-  if (existing) {
-    return NextResponse.json(
-      { error: "You've already voted on this case" },
-      { status: 409 }
-    );
+  const groupPhase2 = Boolean(groupId) && phase === 2;
+
+  if (!groupPhase2) {
+    const [existing] = groupId
+      ? await sql`
+          SELECT id FROM votes
+          WHERE case_id = ${caseId} AND user_id = ${session.user.id}
+            AND group_id = ${groupId} AND phase = ${phase}
+        `
+      : await sql`
+          SELECT id FROM votes
+          WHERE case_id = ${caseId} AND user_id = ${session.user.id}
+            AND group_id IS NULL AND phase = ${phase}
+        `;
+    if (existing) {
+      return NextResponse.json(
+        { error: "You've already voted on this case" },
+        { status: 409 }
+      );
+    }
   }
 
   if (phase === 2) {
@@ -82,11 +88,28 @@ export async function POST(request: Request) {
     }
   }
 
+  if (groupPhase2) {
+    const deliberation = await resolveIfPossible(caseId, groupId!);
+    if (!deliberation || deliberation.status !== "pending") {
+      return NextResponse.json(
+        { error: "Deliberation has already concluded" },
+        { status: 409 }
+      );
+    }
+  }
+
   const [vote] = await sql`
     INSERT INTO votes (case_id, group_id, user_id, phase, choice, reasoning_note)
     VALUES (${caseId}, ${groupId}, ${session.user.id}, ${phase}, ${choice}, ${reasoningNote})
     RETURNING id, choice, created_at
   `;
+
+  if (groupId && phase === 1) {
+    await checkQuorumAndMaybeStart(caseId, groupId);
+  }
+  if (groupId && phase === 2) {
+    await resolveIfPossible(caseId, groupId);
+  }
 
   return NextResponse.json({ vote }, { status: 201 });
 }
