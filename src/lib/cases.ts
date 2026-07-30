@@ -33,6 +33,16 @@ export async function getTodaysCase(): Promise<Case | null> {
   return (row as Case) ?? null;
 }
 
+export async function getCaseById(caseId: string): Promise<Case | null> {
+  const [row] = await sql`
+    SELECT id, slug, title, brief, evidence, vote_options, counter_arguments,
+           year, real_verdict, historical_context, difficulty, source_url, drop_date
+    FROM cases
+    WHERE id = ${caseId}
+  `;
+  return (row as Case) ?? null;
+}
+
 /**
  * One real, Wikipedia-sourced test case so TIN-464 (Phase 1 ballot flow)
  * has something real to render and vote on. Bulk case authoring (20-25

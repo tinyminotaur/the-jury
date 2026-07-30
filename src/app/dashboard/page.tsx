@@ -2,8 +2,9 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth/server";
 import { ensureSchema, sql } from "@/lib/db";
 import { getTodaysCase, seedCases } from "@/lib/cases";
+import { Reveal } from "@/components/reveal";
 import { SignOutButton } from "./sign-out-button";
-import { CaseBallot, SoloPhase2, VotedSummary } from "./case-ballot";
+import { CaseBallot, SoloPhase2 } from "./case-ballot";
 
 export default async function DashboardPage() {
   const { data: session } = await getSession();
@@ -45,18 +46,9 @@ export default async function DashboardPage() {
           No case has dropped yet. Check back soon.
         </p>
       ) : phase2Vote ? (
-        <VotedSummary
-          theCase={theCase}
-          choice={phase2Vote.choice}
-          reasoningNote={phase1Vote?.reasoning_note ?? null}
-          initialChoice={phase1Vote?.choice}
-        />
+        <Reveal caseId={theCase.id} />
       ) : phase1Vote ? (
-        <SoloPhase2
-          theCase={theCase}
-          phase1Choice={phase1Vote.choice}
-          phase1ReasoningNote={phase1Vote.reasoning_note}
-        />
+        <SoloPhase2 theCase={theCase} phase1Choice={phase1Vote.choice} />
       ) : (
         <CaseBallot theCase={theCase} />
       )}

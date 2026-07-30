@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Case } from "@/lib/cases";
+import { Reveal } from "@/components/reveal";
 
 function CaseBrief({ theCase }: { theCase: Case }) {
   const [showEvidence, setShowEvidence] = useState(false);
@@ -105,11 +106,9 @@ export function VotedSummary({
 export function SoloPhase2({
   theCase,
   phase1Choice,
-  phase1ReasoningNote,
 }: {
   theCase: Case;
   phase1Choice: string;
-  phase1ReasoningNote: string | null;
 }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "error">(
     "idle"
@@ -140,14 +139,7 @@ export function SoloPhase2({
   }
 
   if (finalChoice) {
-    return (
-      <VotedSummary
-        theCase={theCase}
-        choice={finalChoice}
-        reasoningNote={phase1ReasoningNote}
-        initialChoice={phase1Choice}
-      />
-    );
+    return <Reveal caseId={theCase.id} />;
   }
 
   return (
@@ -257,11 +249,7 @@ export function CaseBallot({
         reasoningNote={submitted.reasoningNote}
       />
     ) : (
-      <SoloPhase2
-        theCase={theCase}
-        phase1Choice={submitted.choice}
-        phase1ReasoningNote={submitted.reasoningNote}
-      />
+      <SoloPhase2 theCase={theCase} phase1Choice={submitted.choice} />
     );
   }
 

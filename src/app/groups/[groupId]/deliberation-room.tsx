@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { Case } from "@/lib/cases";
+import { Reveal } from "@/components/reveal";
 
 type DeliberationState = {
   status: "pending" | "unanimous" | "majority" | "hung";
@@ -117,20 +118,7 @@ export function DeliberationRoom({
   }
 
   if (deliberation && deliberation.status !== "pending") {
-    return (
-      <div className="rounded-xl border p-6 text-center">
-        <p className="text-lg font-medium">
-          {deliberation.status === "unanimous" &&
-            `Unanimous verdict: ${deliberation.final_choice}`}
-          {deliberation.status === "majority" &&
-            `Majority verdict: ${deliberation.final_choice}`}
-          {deliberation.status === "hung" && "Hung jury — no consensus reached"}
-        </p>
-        <p className="mt-2 text-sm text-zinc-400">
-          You&apos;ll see how it compares to history at reveal.
-        </p>
-      </div>
-    );
+    return <Reveal caseId={theCase.id} groupId={groupId} />;
   }
 
   const msRemaining = deliberation
