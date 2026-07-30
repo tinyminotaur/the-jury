@@ -39,6 +39,10 @@ export async function getTodaysCase(): Promise<Case | null> {
  * cases per the launch plan) is TIN-469's job, not this seed.
  */
 export async function seedCases(): Promise<void> {
+  // IMPORTANT: nothing below this point may reveal the real outcome --
+  // brief, evidence, and counter_arguments are all shown BEFORE/DURING
+  // voting. The real verdict only belongs in real_verdict/historical_context,
+  // which are never rendered until the reveal feature (TIN-468) exists.
   const brief = `When Hurricane Katrina struck New Orleans on August 29, 2005, Memorial Medical Center lost power, air conditioning, and water pressure within days. Temperatures inside climbed past 100°F. Evacuation by boat and helicopter was slow and chaotic, and by September 1st, dozens of critically ill patients -- many on the seventh floor, run by LifeCare for long-term acute care -- had still not been moved.
 
 Dr. Anna Pou, an ear-nose-throat surgeon who had stayed behind to help, worked alongside nurses Lori Budo and Cheri Landry to care for patients too sick or too heavy to carry down nine flights of stairs in the dark. When mortuary workers recovered bodies from the hospital after the storm, the count reached 45 -- the highest of any hospital in the city. Toxicology testing later found morphine, the sedative midazolam, or both in 23 of 41 bodies examined.
@@ -47,9 +51,7 @@ Louisiana's Attorney General, Charles Foti, called it "not euthanasia; this is p
 
 Pou's defense argued the opposite: that she and the nurses were practicing compassionate, standard end-of-life care under conditions no medical protocol had ever anticipated -- no reliable evacuation timeline, no working equipment, no realistic hope of safely moving some patients at all. They argued intent, not outcome, was what mattered, and that the intent was to ease suffering, not end life.
 
-A Louisiana grand jury heard the evidence in July 2007 and declined to indict Pou on any charge. The case never went to trial. The state later paid over $450,000 of her legal fees, and lawmakers issued a formal apology.
-
-Was this a doctor making an impossible call under the worst conditions imaginable -- or something else? The grand jury's answer was clear. Whether it was the right one is still debated.`;
+The facts, the toxicology, and the two competing explanations were all public well before the case was ultimately decided. Was this a doctor making an impossible call under the worst conditions imaginable, or was it homicide? You're the jury now.`;
 
   const evidence = JSON.stringify([
     {
@@ -63,19 +65,20 @@ Was this a doctor making an impossible call under the worst conditions imaginabl
         "Charles Foti's 2006 characterization of the deaths as homicide, not euthanasia.",
     },
     {
-      title: "Grand jury outcome",
+      title: "Hospital conditions timeline",
       description:
-        "July 2007: grand jury declined to indict Dr. Pou on any of the four second-degree murder counts.",
+        "By September 1, 2005, the hospital had no power, no air conditioning, and indoor temperatures above 100°F, with the sickest patients still not evacuated.",
     },
   ]);
 
   // Keyed by vote_option -- shown to whoever voted THAT way, arguing the
   // opposite side (PRD 2.3: "strongest counter-argument to their vote").
+  // Must argue from the facts above only -- never cite the real outcome.
   const counterArguments = JSON.stringify({
     Guilty:
-      "Consider the conditions: no power, no water, 100°F+ heat, and no realistic evacuation timeline for patients who could not physically be moved. Every account from survivors describes chaotic conditions where medical staff made impossible triage calls with no playbook. The grand jury heard all the evidence, including detailed testimony from other medical staff, and still declined to indict on any of the four counts. If professionals who reviewed everything found no probable cause for murder, doesn't that suggest reasonable doubt is the right call?",
+      "Consider the conditions: no power, no water, temperatures over 100°F, and no realistic evacuation timeline for patients who could not physically be moved. Every survivor account describes chaos, with medical staff forced into impossible triage decisions with no established protocol. The prosecution's case rests heavily on toxicology alone -- but morphine and midazolam are standard end-of-life comfort medications, and using them under crisis conditions isn't automatically evidence of intent to kill. Doesn't the sheer chaos of the situation create real reasonable doubt about what was actually intended?",
     "Not Guilty":
-      "23 of 41 bodies tested positive for morphine, midazolam, or both -- drugs that, in these doses and combinations, go beyond standard palliative care. Some patients were reportedly not in imminent danger of dying before receiving these doses. A grand jury declining to indict isn't the same as innocence: grand juries have a low bar, complex cases can strain prosecutorial resources, and there was intense political pressure to protect first responders during a chaotic disaster response. Doesn't the toxicology evidence alone raise real doubt about the \"it was just comfort care\" explanation?",
+      "23 of 41 bodies tested positive for morphine, midazolam, or both -- a striking pattern for a hospital, and these drugs in these doses go beyond routine comfort care. Some patients were reportedly not in imminent danger of dying before receiving these doses. The state's own Attorney General, after investigating directly, called it \"plain and simple homicide\" -- a serious conclusion from an official who reviewed the evidence firsthand. Doesn't the scale and pattern of the toxicology findings alone raise real doubt about the \"it was just compassionate care\" explanation?",
   });
 
   await sql`
@@ -97,6 +100,9 @@ Was this a doctor making an impossible call under the worst conditions imaginabl
       'https://en.wikipedia.org/wiki/Anna_Pou',
       CURRENT_DATE
     )
-    ON CONFLICT (slug) DO UPDATE SET counter_arguments = EXCLUDED.counter_arguments
+    ON CONFLICT (slug) DO UPDATE SET
+      brief = EXCLUDED.brief,
+      evidence = EXCLUDED.evidence,
+      counter_arguments = EXCLUDED.counter_arguments
   `;
 }
