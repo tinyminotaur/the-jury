@@ -60,16 +60,26 @@ export function VotedSummary({
   theCase,
   choice,
   reasoningNote,
+  initialChoice,
 }: {
   theCase: Case;
   choice: string;
   reasoningNote: string | null;
+  /** Pass when the final choice differs from an earlier one (solo swing). */
+  initialChoice?: string;
 }) {
   return (
     <div className="grid gap-6">
       <CaseBrief theCase={theCase} />
       <div className="rounded-xl border p-6">
-        <p className="text-lg font-medium">Your vote: {choice}</p>
+        <p className="text-lg font-medium">
+          Your vote: {choice}
+          {initialChoice && initialChoice !== choice && (
+            <span className="ml-2 text-sm font-normal text-amber-400">
+              (changed from {initialChoice})
+            </span>
+          )}
+        </p>
         {reasoningNote ? (
           <p className="mt-3 whitespace-pre-line text-sm text-zinc-300">
             &ldquo;{reasoningNote}&rdquo;
@@ -82,6 +92,106 @@ export function VotedSummary({
         <p className="mt-4 text-sm text-zinc-400">
           Locked in. You&apos;ll see how it compares to history at reveal.
         </p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Solo's Phase 2 adaptation (PRD 2.3): no group to deliberate with, so
+ * instead the player sees the strongest case against their own vote and
+ * can affirm it or change their mind. Concludes immediately on submit.
+ */
+export function SoloPhase2({
+  theCase,
+  phase1Choice,
+  phase1ReasoningNote,
+}: {
+  theCase: Case;
+  phase1Choice: string;
+  phase1ReasoningNote: string | null;
+}) {
+  const [status, setStatus] = useState<"idle" | "submitting" | "error">(
+    "idle"
+  );
+  const [error, setError] = useState<string | null>(null);
+  const [finalChoice, setFinalChoice] = useState<string | null>(null);
+
+  const counterArgument = theCase.counter_arguments[phase1Choice];
+
+  async function submitFinal(choice: string) {
+    setStatus("submitting");
+    setError(null);
+
+    const res = await fetch("/api/votes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ caseId: theCase.id, choice, phase: 2 }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setStatus("error");
+      setError(data.error ?? "Something went wrong. Try again.");
+      return;
+    }
+
+    setFinalChoice(choice);
+  }
+
+  if (finalChoice) {
+    return (
+      <VotedSummary
+        theCase={theCase}
+        choice={finalChoice}
+        reasoningNote={phase1ReasoningNote}
+        initialChoice={phase1Choice}
+      />
+    );
+  }
+
+  return (
+    <div className="grid gap-6">
+      <CaseBrief theCase={theCase} />
+      <div className="grid gap-4 rounded-xl border p-6">
+        <p className="text-sm text-zinc-400">
+          Your initial vote: <span className="text-white">{phase1Choice}</span>
+        </p>
+
+        {counterArgument && (
+          <div>
+            <p className="text-sm font-medium">
+              The strongest case against your vote:
+            </p>
+            <p className="mt-2 text-sm text-zinc-300">{counterArgument}</p>
+          </div>
+        )}
+
+        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => submitFinal(phase1Choice)}
+            disabled={status === "submitting"}
+            className="flex-1 rounded-full bg-white px-4 py-2 text-sm font-medium text-black disabled:opacity-50"
+          >
+            Keep my vote: {phase1Choice}
+          </button>
+          {theCase.vote_options
+            .filter((option) => option !== phase1Choice)
+            .map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => submitFinal(option)}
+                disabled={status === "submitting"}
+                className="flex-1 rounded-full border px-4 py-2 text-sm font-medium disabled:opacity-50"
+              >
+                Change to: {option}
+              </button>
+            ))}
+        </div>
       </div>
     </div>
   );
@@ -137,11 +247,20 @@ export function CaseBallot({
   }
 
   if (submitted) {
-    return (
+    // Solo: straight into the Phase 2 counter-argument adaptation (no
+    // group to wait on). Group: locked-in, waiting on Phase 2 deliberation
+    // (TIN-465) -- just show the standard confirmation for now.
+    return groupId ? (
       <VotedSummary
         theCase={theCase}
         choice={submitted.choice}
         reasoningNote={submitted.reasoningNote}
+      />
+    ) : (
+      <SoloPhase2
+        theCase={theCase}
+        phase1Choice={submitted.choice}
+        phase1ReasoningNote={submitted.reasoningNote}
       />
     );
   }

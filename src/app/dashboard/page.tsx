@@ -3,7 +3,7 @@ import { getSession } from "@/lib/auth/server";
 import { ensureSchema, sql } from "@/lib/db";
 import { getTodaysCase, seedCases } from "@/lib/cases";
 import { SignOutButton } from "./sign-out-button";
-import { CaseBallot, VotedSummary } from "./case-ballot";
+import { CaseBallot, SoloPhase2, VotedSummary } from "./case-ballot";
 
 export default async function DashboardPage() {
   const { data: session } = await getSession();
@@ -13,15 +13,20 @@ export default async function DashboardPage() {
   await seedCases();
   const theCase = await getTodaysCase();
 
-  const existingVote = theCase
-    ? (
-        await sql`
-          SELECT choice, reasoning_note FROM votes
-          WHERE case_id = ${theCase.id} AND user_id = ${user.id}
-            AND group_id IS NULL AND phase = 1
-        `
-      )[0]
-    : null;
+  let phase1Vote = null;
+  let phase2Vote = null;
+  if (theCase) {
+    [phase1Vote] = await sql`
+      SELECT choice, reasoning_note FROM votes
+      WHERE case_id = ${theCase.id} AND user_id = ${user.id}
+        AND group_id IS NULL AND phase = 1
+    `;
+    [phase2Vote] = await sql`
+      SELECT choice FROM votes
+      WHERE case_id = ${theCase.id} AND user_id = ${user.id}
+        AND group_id IS NULL AND phase = 2
+    `;
+  }
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6">
@@ -39,11 +44,18 @@ export default async function DashboardPage() {
         <p className="text-center text-zinc-400">
           No case has dropped yet. Check back soon.
         </p>
-      ) : existingVote ? (
+      ) : phase2Vote ? (
         <VotedSummary
           theCase={theCase}
-          choice={existingVote.choice}
-          reasoningNote={existingVote.reasoning_note}
+          choice={phase2Vote.choice}
+          reasoningNote={phase1Vote?.reasoning_note ?? null}
+          initialChoice={phase1Vote?.choice}
+        />
+      ) : phase1Vote ? (
+        <SoloPhase2
+          theCase={theCase}
+          phase1Choice={phase1Vote.choice}
+          phase1ReasoningNote={phase1Vote.reasoning_note}
         />
       ) : (
         <CaseBallot theCase={theCase} />

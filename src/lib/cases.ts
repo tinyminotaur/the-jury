@@ -7,6 +7,7 @@ export type Case = {
   brief: string;
   evidence: { title: string; description: string }[];
   vote_options: string[];
+  counter_arguments: Record<string, string>;
   year: number | null;
   real_verdict: string | null;
   historical_context: string | null;
@@ -22,8 +23,8 @@ export type Case = {
  */
 export async function getTodaysCase(): Promise<Case | null> {
   const [row] = await sql`
-    SELECT id, slug, title, brief, evidence, vote_options, year,
-           real_verdict, historical_context, difficulty, source_url, drop_date
+    SELECT id, slug, title, brief, evidence, vote_options, counter_arguments,
+           year, real_verdict, historical_context, difficulty, source_url, drop_date
     FROM cases
     WHERE drop_date <= CURRENT_DATE
     ORDER BY drop_date DESC
@@ -68,9 +69,18 @@ Was this a doctor making an impossible call under the worst conditions imaginabl
     },
   ]);
 
+  // Keyed by vote_option -- shown to whoever voted THAT way, arguing the
+  // opposite side (PRD 2.3: "strongest counter-argument to their vote").
+  const counterArguments = JSON.stringify({
+    Guilty:
+      "Consider the conditions: no power, no water, 100°F+ heat, and no realistic evacuation timeline for patients who could not physically be moved. Every account from survivors describes chaotic conditions where medical staff made impossible triage calls with no playbook. The grand jury heard all the evidence, including detailed testimony from other medical staff, and still declined to indict on any of the four counts. If professionals who reviewed everything found no probable cause for murder, doesn't that suggest reasonable doubt is the right call?",
+    "Not Guilty":
+      "23 of 41 bodies tested positive for morphine, midazolam, or both -- drugs that, in these doses and combinations, go beyond standard palliative care. Some patients were reportedly not in imminent danger of dying before receiving these doses. A grand jury declining to indict isn't the same as innocence: grand juries have a low bar, complex cases can strain prosecutorial resources, and there was intense political pressure to protect first responders during a chaotic disaster response. Doesn't the toxicology evidence alone raise real doubt about the \"it was just comfort care\" explanation?",
+  });
+
   await sql`
     INSERT INTO cases (
-      slug, title, brief, evidence, vote_options, year,
+      slug, title, brief, evidence, vote_options, counter_arguments, year,
       real_verdict, historical_context, difficulty, source_url, drop_date
     )
     VALUES (
@@ -79,6 +89,7 @@ Was this a doctor making an impossible call under the worst conditions imaginabl
       ${brief},
       ${evidence}::jsonb,
       '["Guilty", "Not Guilty"]'::jsonb,
+      ${counterArguments}::jsonb,
       2005,
       'No indictment -- a Louisiana grand jury declined to charge her in July 2007; the case never went to trial.',
       'Became a landmark case in disaster medicine and triage ethics, cited in hospital emergency-preparedness reform afterward.',
@@ -86,6 +97,6 @@ Was this a doctor making an impossible call under the worst conditions imaginabl
       'https://en.wikipedia.org/wiki/Anna_Pou',
       CURRENT_DATE
     )
-    ON CONFLICT (slug) DO NOTHING
+    ON CONFLICT (slug) DO UPDATE SET counter_arguments = EXCLUDED.counter_arguments
   `;
 }
