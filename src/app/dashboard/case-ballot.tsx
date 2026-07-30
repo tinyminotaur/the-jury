@@ -4,55 +4,111 @@ import { useState } from "react";
 import type { Case } from "@/lib/cases";
 import { Reveal } from "@/components/reveal";
 
+function evidenceIcon(title: string): string {
+  const t = title.toLowerCase();
+  if (t.includes("toxicology") || t.includes("test")) return "🧪";
+  if (t.includes("statement") || t.includes("said")) return "📢";
+  if (t.includes("timeline") || t.includes("condition")) return "🏥";
+  if (t.includes("testimony") || t.includes("witness")) return "🗣️";
+  return "📄";
+}
+
 function CaseBrief({ theCase }: { theCase: Case }) {
   const [showEvidence, setShowEvidence] = useState(false);
+  const [showFullBrief, setShowFullBrief] = useState(false);
 
   return (
-    <div className="grid gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">{theCase.title}</h1>
-        <p className="mt-1 text-sm text-zinc-400">
-          {theCase.year && `${theCase.year} · `}
-          {"★".repeat(theCase.difficulty)}
-          {"☆".repeat(5 - theCase.difficulty)}
-        </p>
+    <div className="overflow-hidden rounded-2xl border">
+      <div className="bg-gradient-to-br from-indigo-950 via-zinc-900 to-amber-950 p-6">
+        <div className="text-4xl">⚖️</div>
+        <h1 className="mt-3 text-2xl font-bold text-white">{theCase.title}</h1>
+        <div className="mt-2 flex items-center gap-3 text-sm text-zinc-300">
+          {theCase.year && <span>{theCase.year}</span>}
+          <span>
+            <span className="text-amber-400">{"★".repeat(theCase.difficulty)}</span>
+            <span className="text-zinc-600">{"★".repeat(5 - theCase.difficulty)}</span>
+          </span>
+        </div>
       </div>
 
-      <div className="whitespace-pre-line leading-relaxed text-zinc-200">
-        {theCase.brief}
-      </div>
+      <div className="grid gap-5 p-6">
+        {theCase.tldr && (
+          <div className="rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4">
+            <p className="text-xs font-semibold tracking-wide text-indigo-400 uppercase">
+              TL;DR
+            </p>
+            <p className="mt-1 text-base font-medium text-zinc-100">
+              {theCase.tldr}
+            </p>
+          </div>
+        )}
 
-      <a
-        href={theCase.source_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-sm text-zinc-400 underline"
-      >
-        Source: Wikipedia
-      </a>
+        {theCase.key_facts.length > 0 && (
+          <ul className="grid gap-2">
+            {theCase.key_facts.map((fact, i) => (
+              <li key={i} className="flex gap-2 text-sm text-zinc-200">
+                <span className="text-amber-400">▸</span>
+                <span>{fact}</span>
+              </li>
+            ))}
+          </ul>
+        )}
 
-      {theCase.evidence.length > 0 && (
         <div>
           <button
             type="button"
-            onClick={() => setShowEvidence((v) => !v)}
-            className="text-sm underline"
+            onClick={() => setShowFullBrief((v) => !v)}
+            className="text-sm text-zinc-400 underline"
           >
-            {showEvidence ? "Hide" : "Show"} evidence exhibits (
-            {theCase.evidence.length})
+            {showFullBrief ? "Hide" : "Read"} the full account
           </button>
-          {showEvidence && (
-            <ul className="mt-3 grid gap-3">
-              {theCase.evidence.map((item, i) => (
-                <li key={i} className="rounded-lg border p-3 text-sm">
-                  <p className="font-medium">{item.title}</p>
-                  <p className="mt-1 text-zinc-400">{item.description}</p>
-                </li>
-              ))}
-            </ul>
+          {showFullBrief && (
+            <div className="mt-3 whitespace-pre-line text-sm leading-relaxed text-zinc-300">
+              {theCase.brief}
+            </div>
           )}
         </div>
-      )}
+
+        <a
+          href={theCase.source_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-zinc-400 underline"
+        >
+          Source: Wikipedia
+        </a>
+
+        {theCase.evidence.length > 0 && (
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowEvidence((v) => !v)}
+              className="text-sm underline"
+            >
+              {showEvidence ? "Hide" : "Show"} evidence exhibits (
+              {theCase.evidence.length})
+            </button>
+            {showEvidence && (
+              <ul className="mt-3 grid gap-3">
+                {theCase.evidence.map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex gap-3 rounded-lg border p-3 text-sm"
+                  >
+                    <span className="text-xl leading-none">
+                      {evidenceIcon(item.title)}
+                    </span>
+                    <div>
+                      <p className="font-medium">{item.title}</p>
+                      <p className="mt-1 text-zinc-400">{item.description}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

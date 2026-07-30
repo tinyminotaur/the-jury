@@ -55,6 +55,8 @@ export async function ensureSchema(): Promise<void> {
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     slug text UNIQUE NOT NULL,
     title text NOT NULL,
+    tldr text NOT NULL DEFAULT '',
+    key_facts jsonb NOT NULL DEFAULT '[]',
     brief text NOT NULL,
     evidence jsonb NOT NULL DEFAULT '[]',
     vote_options jsonb NOT NULL DEFAULT '["Guilty", "Not Guilty"]',
@@ -71,6 +73,8 @@ export async function ensureSchema(): Promise<void> {
   // CREATE TABLE IF NOT EXISTS above is a no-op there, so add them directly.
   await sql`ALTER TABLE cases ADD COLUMN IF NOT EXISTS vote_options jsonb NOT NULL DEFAULT '["Guilty", "Not Guilty"]';`;
   await sql`ALTER TABLE cases ADD COLUMN IF NOT EXISTS counter_arguments jsonb NOT NULL DEFAULT '{}';`;
+  await sql`ALTER TABLE cases ADD COLUMN IF NOT EXISTS tldr text NOT NULL DEFAULT '';`;
+  await sql`ALTER TABLE cases ADD COLUMN IF NOT EXISTS key_facts jsonb NOT NULL DEFAULT '[]';`;
 
   // Append-only: the current vote for a (case, group, user, phase) is the
   // latest row by created_at. This is what makes swing-rate tracking (PRD

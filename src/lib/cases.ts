@@ -4,6 +4,8 @@ export type Case = {
   id: string;
   slug: string;
   title: string;
+  tldr: string;
+  key_facts: string[];
   brief: string;
   evidence: { title: string; description: string }[];
   vote_options: string[];
@@ -23,7 +25,7 @@ export type Case = {
  */
 export async function getTodaysCase(): Promise<Case | null> {
   const [row] = await sql`
-    SELECT id, slug, title, brief, evidence, vote_options, counter_arguments,
+    SELECT id, slug, title, tldr, key_facts, brief, evidence, vote_options, counter_arguments,
            year, real_verdict, historical_context, difficulty, source_url, drop_date
     FROM cases
     WHERE drop_date <= CURRENT_DATE
@@ -35,7 +37,7 @@ export async function getTodaysCase(): Promise<Case | null> {
 
 export async function getCaseById(caseId: string): Promise<Case | null> {
   const [row] = await sql`
-    SELECT id, slug, title, brief, evidence, vote_options, counter_arguments,
+    SELECT id, slug, title, tldr, key_facts, brief, evidence, vote_options, counter_arguments,
            year, real_verdict, historical_context, difficulty, source_url, drop_date
     FROM cases
     WHERE id = ${caseId}
@@ -62,6 +64,16 @@ Louisiana's Attorney General, Charles Foti, called it "not euthanasia; this is p
 Pou's defense argued the opposite: that she and the nurses were practicing compassionate, standard end-of-life care under conditions no medical protocol had ever anticipated -- no reliable evacuation timeline, no working equipment, no realistic hope of safely moving some patients at all. They argued intent, not outcome, was what mattered, and that the intent was to ease suffering, not end life.
 
 The facts, the toxicology, and the two competing explanations were all public well before the case was ultimately decided. Was this a doctor making an impossible call under the worst conditions imaginable, or was it homicide? You're the jury now.`;
+
+  const tldr =
+    "A surgeon gave dying patients high-dose sedatives as a hospital collapsed during Hurricane Katrina. She was charged with four counts of second-degree murder. Mercy, or murder?";
+
+  const keyFacts = JSON.stringify([
+    "Memorial Medical Center lost power and water in 100°F+ heat, with no realistic evacuation plan for its sickest patients.",
+    "23 of 41 recovered bodies tested positive for morphine, midazolam, or both.",
+    "Dr. Anna Pou faced four counts of second-degree murder if convicted.",
+    "The defense called it standard end-of-life comfort care; prosecutors called it intentional killing.",
+  ]);
 
   const evidence = JSON.stringify([
     {
@@ -93,12 +105,14 @@ The facts, the toxicology, and the two competing explanations were all public we
 
   await sql`
     INSERT INTO cases (
-      slug, title, brief, evidence, vote_options, counter_arguments, year,
+      slug, title, tldr, key_facts, brief, evidence, vote_options, counter_arguments, year,
       real_verdict, historical_context, difficulty, source_url, drop_date
     )
     VALUES (
       'anna-pou-katrina',
       'Dr. Anna Pou — Mercy or Murder?',
+      ${tldr},
+      ${keyFacts}::jsonb,
       ${brief},
       ${evidence}::jsonb,
       '["Guilty", "Not Guilty"]'::jsonb,
@@ -111,6 +125,8 @@ The facts, the toxicology, and the two competing explanations were all public we
       CURRENT_DATE
     )
     ON CONFLICT (slug) DO UPDATE SET
+      tldr = EXCLUDED.tldr,
+      key_facts = EXCLUDED.key_facts,
       brief = EXCLUDED.brief,
       evidence = EXCLUDED.evidence,
       counter_arguments = EXCLUDED.counter_arguments
