@@ -5,7 +5,7 @@ export const borden: SeedCase = {
   title: "Lizzie Borden — The Axe Murders",
   drop_date: "2026-08-05",
   year: 1892,
-  difficulty: 4,
+  difficulty: 3,
   source_url: "https://en.wikipedia.org/wiki/Lizzie_Borden",
   tldr:
     "A prosperous Fall River couple were killed with an axe in their own house. Their adult daughter was the one put on trial. Circumstantial case — or reasonable doubt?",

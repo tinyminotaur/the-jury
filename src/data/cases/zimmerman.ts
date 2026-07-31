@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const zimmerman: SeedCase = {
   slug: "george-zimmerman",
   title: "George Zimmerman — Neighborhood Watch",
-  drop_date: "2026-08-20",
+  drop_date: "2026-08-14",
   year: 2012,
   difficulty: 4,
   source_url: "https://en.wikipedia.org/wiki/Trial_of_George_Zimmerman",

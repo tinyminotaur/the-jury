@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const holmes: SeedCase = {
   slug: "elizabeth-holmes-theranos",
   title: "Elizabeth Holmes — Blood from a Fingerprick?",
-  drop_date: "2026-08-14",
+  drop_date: "2026-08-10",
   year: 2018,
   difficulty: 2,
   source_url: "https://en.wikipedia.org/wiki/Elizabeth_Holmes",

@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const amandaKnox: SeedCase = {
   slug: "amanda-knox",
   title: "Amanda Knox — Murder in Perugia",
-  drop_date: "2026-08-19",
+  drop_date: "2026-08-13",
   year: 2007,
   difficulty: 4,
   source_url: "https://en.wikipedia.org/wiki/Amanda_Knox",

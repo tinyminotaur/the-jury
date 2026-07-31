@@ -3,9 +3,9 @@ import type { SeedCase } from "./types";
 export const goetz: SeedCase = {
   slug: "bernhard-goetz",
   title: "Bernhard Goetz — Subway Vigilante",
-  drop_date: "2026-08-03",
+  drop_date: "2026-08-15",
   year: 1984,
-  difficulty: 3,
+  difficulty: 2,
   source_url: "https://en.wikipedia.org/wiki/1984_New_York_City_Subway_shooting",
   tldr:
     "A man shot four teenagers on a New York subway after they approached him for money. He called it self-defense against an imminent robbery. Prosecutors called it vigilantism. Where is the line?",

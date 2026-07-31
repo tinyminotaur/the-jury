@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const pistorius: SeedCase = {
   slug: "oscar-pistorius",
   title: "Oscar Pistorius — The Bathroom Door",
-  drop_date: "2026-08-17",
+  drop_date: "2026-08-18",
   year: 2013,
   difficulty: 3,
   source_url: "https://en.wikipedia.org/wiki/Oscar_Pistorius",

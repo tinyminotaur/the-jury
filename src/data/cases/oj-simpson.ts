@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const ojSimpson: SeedCase = {
   slug: "oj-simpson",
   title: "O.J. Simpson — The Trial of the Century",
-  drop_date: "2026-08-21",
+  drop_date: "2026-08-20",
   year: 1995,
   difficulty: 5,
   source_url: "https://en.wikipedia.org/wiki/Murder_trial_of_O._J._Simpson",

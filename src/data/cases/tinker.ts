@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const tinker: SeedCase = {
   slug: "tinker-v-des-moines",
   title: "Tinker v. Des Moines — Armbands at School",
-  drop_date: "2026-08-06",
+  drop_date: "2026-08-03",
   year: 1965,
   difficulty: 1,
   source_url:

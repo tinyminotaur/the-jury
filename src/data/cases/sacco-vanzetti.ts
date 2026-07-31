@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const saccoVanzetti: SeedCase = {
   slug: "sacco-vanzetti",
   title: "Sacco and Vanzetti — Justice or Prejudice?",
-  drop_date: "2026-08-13",
+  drop_date: "2026-08-07",
   year: 1921,
   difficulty: 5,
   source_url: "https://en.wikipedia.org/wiki/Sacco_and_Vanzetti",

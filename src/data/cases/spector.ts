@@ -3,9 +3,9 @@ import type { SeedCase } from "./types";
 export const spector: SeedCase = {
   slug: "phil-spector",
   title: "Phil Spector — The House in Alhambra",
-  drop_date: "2026-08-22",
+  drop_date: "2026-08-23",
   year: 2003,
-  difficulty: 3,
+  difficulty: 2,
   source_url: "https://en.wikipedia.org/wiki/Phil_Spector",
   tldr:
     "A legendary music producer brings an actress home to his Alhambra mansion; she is found shot dead in a chair. He says she killed herself. Prosecutors say he pulled the trigger.",

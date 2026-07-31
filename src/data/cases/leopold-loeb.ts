@@ -3,9 +3,9 @@ import type { SeedCase } from "./types";
 export const leopoldLoeb: SeedCase = {
   slug: "leopold-loeb",
   title: "Leopold and Loeb — Death or Mercy?",
-  drop_date: "2026-08-15",
+  drop_date: "2026-08-22",
   year: 1924,
-  difficulty: 3,
+  difficulty: 2,
   source_url: "https://en.wikipedia.org/wiki/Leopold_and_Loeb",
   tldr:
     "Two wealthy Chicago teenagers kidnapped and killed fourteen-year-old Bobby Franks for a 'perfect crime.' They confessed. Clarence Darrow begs the court not to hang them. Death — or life?",

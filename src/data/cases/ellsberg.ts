@@ -3,9 +3,9 @@ import type { SeedCase } from "./types";
 export const ellsberg: SeedCase = {
   slug: "pentagon-papers-ellsberg",
   title: "Daniel Ellsberg — The Pentagon Papers",
-  drop_date: "2026-08-04",
+  drop_date: "2026-08-16",
   year: 1971,
-  difficulty: 3,
+  difficulty: 2,
   source_url: "https://en.wikipedia.org/wiki/Daniel_Ellsberg",
   tldr:
     "A defense analyst copied a top-secret history of the Vietnam War and gave it to newspapers. The government charged him under the Espionage Act. Whistleblower — or criminal?",

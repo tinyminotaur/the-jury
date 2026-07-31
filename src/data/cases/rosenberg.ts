@@ -3,9 +3,9 @@ import type { SeedCase } from "./types";
 export const rosenberg: SeedCase = {
   slug: "rosenberg-espionage",
   title: "The Rosenbergs — Atomic Espionage",
-  drop_date: "2026-08-23",
+  drop_date: "2026-08-24",
   year: 1951,
-  difficulty: 4,
+  difficulty: 3,
   source_url: "https://en.wikipedia.org/wiki/Julius_and_Ethel_Rosenberg",
   tldr:
     "A New York couple is charged with conspiracy to pass radar, sonar, and nuclear secrets to the Soviet Union at the dawn of the Cold War. The star witness is the wife's brother. Spies — or victims of a Red Scare?",

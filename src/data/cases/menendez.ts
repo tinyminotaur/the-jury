@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const menendez: SeedCase = {
   slug: "menendez-brothers",
   title: "The Menendez Brothers — Murder or Self-Defense?",
-  drop_date: "2026-08-07",
+  drop_date: "2026-08-04",
   year: 1989,
   difficulty: 3,
   source_url: "https://en.wikipedia.org/wiki/Menendez_brothers",

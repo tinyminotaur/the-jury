@@ -3,9 +3,9 @@ import type { SeedCase } from "./types";
 export const sheppard: SeedCase = {
   slug: "sam-sheppard",
   title: "Sam Sheppard — The Bedroom Murder",
-  drop_date: "2026-08-16",
+  drop_date: "2026-08-12",
   year: 1954,
-  difficulty: 4,
+  difficulty: 3,
   source_url: "https://en.wikipedia.org/wiki/Sam_Sheppard",
   tldr:
     "A pregnant woman is beaten to death in her Bay Village bedroom. Her osteopath husband says a bushy-haired intruder did it. The Cleveland press already has a verdict. Did Sam kill Marilyn?",

@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const caseyAnthony: SeedCase = {
   slug: "casey-anthony",
   title: "Casey Anthony — What Happened to Caylee?",
-  drop_date: "2026-08-12",
+  drop_date: "2026-08-06",
   year: 2008,
   difficulty: 4,
   source_url: "https://en.wikipedia.org/wiki/Death_of_Caylee_Anthony",

@@ -3,9 +3,9 @@ import type { SeedCase } from "./types";
 export const rodneyKing: SeedCase = {
   slug: "rodney-king-officers",
   title: "The Rodney King Officers — Excessive Force?",
-  drop_date: "2026-08-18",
+  drop_date: "2026-08-19",
   year: 1992,
-  difficulty: 4,
+  difficulty: 3,
   source_url: "https://en.wikipedia.org/wiki/Rodney_King",
   tldr:
     "After a high-speed chase, a bystander filmed LAPD officers striking an unarmed Black motorist on the ground. Four officers face state charges of assault and excessive force. Was the force criminal — or a lawful response to resistance?",

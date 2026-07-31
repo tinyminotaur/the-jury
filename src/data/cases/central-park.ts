@@ -3,7 +3,7 @@ import type { SeedCase } from "./types";
 export const centralPark: SeedCase = {
   slug: "central-park-five",
   title: "The Central Park Five — A Night in the Park",
-  drop_date: "2026-08-24",
+  drop_date: "2026-08-21",
   year: 1989,
   difficulty: 5,
   source_url: "https://en.wikipedia.org/wiki/Central_Park_jogger_case",

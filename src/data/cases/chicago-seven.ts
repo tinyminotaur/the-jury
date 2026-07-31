@@ -3,9 +3,9 @@ import type { SeedCase } from "./types";
 export const chicagoSeven: SeedCase = {
   slug: "chicago-seven",
   title: "The Chicago Seven — Conspiracy to Riot?",
-  drop_date: "2026-08-10",
+  drop_date: "2026-08-17",
   year: 1969,
-  difficulty: 3,
+  difficulty: 2,
   source_url: "https://en.wikipedia.org/wiki/Chicago_Seven",
   tldr:
     "Antiwar organizers came to the 1968 Democratic convention. Streets erupted. The government put seven of them on trial for conspiracy and crossing state lines to incite a riot. Protest politics — or a police riot pinned on defendants?",
